@@ -94,43 +94,19 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({ recommendation, dishNam
 
   return (
     <div className="bg-white rounded-lg shadow-soft overflow-hidden flex flex-col border border-gray-100 transition-all duration-300 hover:shadow-xl h-full">
-      <div className="relative h-64 w-full overflow-hidden bg-gray-100 group flex-shrink-0">
-        <img 
-          src={currentSrc} 
-          alt={dishName}
-          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 group-hover:scale-105 ${imageStatus === 'loaded' ? 'opacity-100' : 'opacity-0'}`}
-          onLoad={() => setImageStatus('loaded')}
-          onError={handleImageError}
-        />
-        {(imageStatus === 'loading' || imageStatus === 'error') && (
-          <div className={`absolute inset-0 flex flex-col items-center justify-center ${imageStatus === 'loading' ? 'bg-gray-200' : 'bg-gray-200 text-gray-400'} p-4 text-center`}>
-            {imageStatus === 'loading' && <div className="absolute inset-0 animate-shimmer"></div>}
-            {imageStatus === 'error' && (
-              <>
-                <svg className="w-12 h-12 mb-2 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span className="text-[10px] font-sans uppercase tracking-widest font-bold">Imagem Indisponível</span>
-              </>
-            )}
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+      <div className="p-6 pb-2 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+        <h3 className="text-lg font-display font-bold text-cabernet-900 leading-tight uppercase tracking-tight">
+          {recommendation.suggestion.recommendedWineType}
+        </h3>
         <button 
             onClick={onToggleFavorite}
-            className="absolute top-4 right-4 bg-white/20 backdrop-blur-md hover:bg-white/40 rounded-full p-2 text-white transition-all border border-white/30 z-10"
+            className="bg-white hover:bg-gray-100 rounded-full p-2 text-gray-400 hover:text-red-500 transition-all border border-gray-200"
         >
             {isFavorite ? <HeartIconSolid className="h-5 w-5 text-red-500" /> : <HeartIcon className="h-5 w-5" />}
         </button>
       </div>
 
       <div className="p-6 space-y-6 flex-grow flex flex-col">
-        <div className="border-b border-gray-100 pb-4">
-            <h3 className="text-xl font-display font-bold text-cabernet-900 leading-tight uppercase tracking-tight">
-                {dishName}
-            </h3>
-        </div>
-
         <section>
           <SectionHeader title="O Prato" />
           <p className="text-sm text-gray-600 font-serif-text leading-relaxed">
@@ -147,7 +123,7 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({ recommendation, dishNam
         </section>
 
         <section>
-          <SectionHeader title="Harmonização" />
+          <SectionHeader title="A Consultoria" />
           <p className="text-sm text-gray-600 font-serif-text leading-relaxed">
             {suggestion.reasoning}
           </p>

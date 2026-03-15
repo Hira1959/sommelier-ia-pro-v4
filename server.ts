@@ -159,43 +159,33 @@ const CATEGORY_CACHE: Record<string, string> = {};
 
 const FOOD_LIBRARY: Record<string, string[]> = {
   meat: [
-    'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=600',
-    'https://images.unsplash.com/photo-1603048297172-c92544798d5e?q=80&w=600',
-    'https://images.unsplash.com/photo-1558030006-450675393462?q=80&w=600'
+    'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=800',
+    'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800'
   ],
   pasta: [
-    'https://images.unsplash.com/photo-1473093226795-af9932fe5856?q=80&w=600',
-    'https://images.unsplash.com/photo-1551183053-bf91a1d81141?q=80&w=600',
-    'https://images.unsplash.com/photo-1563379926898-04f4575a44d7?q=80&w=600'
+    'https://images.unsplash.com/photo-1473093226795-af9932fe5856?q=80&w=800'
   ],
   sushi: [
-    'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=600',
-    'https://images.unsplash.com/photo-1553621042-f6e147245754?q=80&w=600',
-    'https://images.unsplash.com/photo-1611143669185-af224c5e3252?q=80&w=600'
+    'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=800'
   ],
   seafood: [
-    'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=600',
-    'https://images.unsplash.com/photo-1467003909585-2f8a72700288?q=80&w=600',
-    'https://images.unsplash.com/photo-1534604973900-c41ab4c5d4b0?q=80&w=600'
+    'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=800'
   ],
   salad: [
-    'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=600',
-    'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600'
+    'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=800'
   ],
   dessert: [
-    'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?q=80&w=600',
-    'https://images.unsplash.com/photo-1551024601-bec78aea704b?q=80&w=600'
+    'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?q=80&w=800'
   ],
   default: [
-    'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=600',
-    'https://images.unsplash.com/photo-1476224483470-4710bd713642?q=80&w=600',
-    'https://images.unsplash.com/photo-1493770348161-369560ae357d?q=80&w=600'
+    'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?q=80&w=800',
+    'https://images.unsplash.com/photo-1506377247377-2a5b3b0ca7df?q=80&w=800'
   ]
 };
 
 app.post("/api/images", async (req, res) => {
   try {
-    const { dishName, count = 3 } = req.body;
+    const { dishName } = req.body;
     let category = 'default';
     const normalizedDish = dishName.toLowerCase();
     
@@ -213,38 +203,33 @@ app.post("/api/images", async (req, res) => {
     } else if (normalizedDish.includes('doce') || normalizedDish.includes('sobremesa') || normalizedDish.includes('chocolate')) {
       category = 'dessert';
     } else if (CATEGORY_CACHE[normalizedDish]) {
-      // 2. Verifica o cache
       category = CATEGORY_CACHE[normalizedDish];
     } else {
-      // 3. Recorre à IA
       try {
         const ai = getAI();
         const response = await ai.models.generateContent({
           model: "gemini-flash-latest",
-          contents: `Analyze the dish "${dishName}" and categorize it into exactly ONE of these: meat (beef, pork, chicken), pasta, sushi, seafood (fish, shrimp), salad, dessert. If unsure, return 'default'. Result should be only the word.`,
+          contents: `Analyze the dish "${dishName}" and categorize it for a SOMMELIER HERO IMAGE. Categories: meat, pasta, sushi, seafood, salad, dessert. Return only the word.`,
         });
         const aiCategory = response.text.trim().toLowerCase();
         if (FOOD_LIBRARY[aiCategory]) {
           category = aiCategory;
-          CATEGORY_CACHE[normalizedDish] = category; // Salva no cache
+          CATEGORY_CACHE[normalizedDish] = category;
         }
       } catch (e) {
-        console.warn("Falha na categorização AI, usando default.");
+        console.warn("Falha na categorização AI.");
       }
     }
     
     const pool = FOOD_LIBRARY[category];
-    const selectedImages = Array.from({ length: count }).map((_, index) => {
-      // Usa o índice e o nome do prato para selecionar imagens consistentes mas variadas
-      const charSum = dishName.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
-      return pool[(charSum + index) % pool.length];
-    });
+    const charSum = dishName.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
+    const heroImage = pool[charSum % pool.length];
 
-    console.log(`Categoria "${category}" para "${dishName}". Imagens:`, selectedImages);
-    res.json(selectedImages);
+    console.log(`Hero image selecionada para "${dishName}": ${heroImage}`);
+    res.json([heroImage]); // Retorna como array de 1 para manter compatibilidade básica se necessário
   } catch (error) {
     console.error("Erro na rota /api/images:", error);
-    res.json(FOOD_LIBRARY.default.slice(0, 3));
+    res.json([FOOD_LIBRARY.default[0]]);
   }
 });
 
