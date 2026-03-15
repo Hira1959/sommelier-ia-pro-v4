@@ -65,6 +65,27 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({ recommendation, dishNam
   const [imageStatus, setImageStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
   const [currentSrc, setCurrentSrc] = useState(dishImage);
 
+  // Mapeamento de "Vibe Visual" baseada no tipo de vinho
+  const getWineVibe = (type: string) => {
+    const t = type.toLowerCase();
+    if (t.includes('tinto')) return 'from-cabernet-900 to-ruby-900';
+    if (t.includes('branco')) return 'from-amber-100 to-gold-200';
+    if (t.includes('rosé') || t.includes('rose')) return 'from-rose-100 to-salmon-200';
+    if (t.includes('espumante') || t.includes('champagne')) return 'from-yellow-50 to-gold-100';
+    return 'from-gray-50 to-gray-100';
+  };
+
+  const getWineTextSecondary = (type: string) => {
+    const t = type.toLowerCase();
+    if (t.includes('tinto')) return 'text-cabernet-100';
+    if (t.includes('branco') || t.includes('espumante') || t.includes('rosé') || t.includes('rose')) return 'text-amber-900/60';
+    return 'text-gray-500';
+  };
+
+  const vibeGradient = getWineVibe(suggestion.recommendedWineType);
+  const textSecondary = getWineTextSecondary(suggestion.recommendedWineType);
+  const isDarkVibe = suggestion.recommendedWineType.toLowerCase().includes('tinto');
+
   const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800';
 
   // Sincroniza o src quando a prop dishImage mudar (nova busca)
@@ -93,14 +114,19 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({ recommendation, dishNam
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-soft overflow-hidden flex flex-col border border-gray-100 transition-all duration-300 hover:shadow-xl h-full">
-      <div className="p-6 pb-2 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-        <h3 className="text-lg font-display font-bold text-cabernet-900 leading-tight uppercase tracking-tight">
-          {recommendation.suggestion.recommendedWineType}
-        </h3>
+    <div className={`rounded-lg shadow-soft overflow-hidden flex flex-col border border-gray-100 transition-all duration-300 hover:shadow-xl h-full bg-white`}>
+      <div className={`p-6 pb-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-br ${vibeGradient}`}>
+        <div className="flex flex-col">
+          <span className={`text-[10px] uppercase tracking-[0.2em] font-bold mb-1 ${isDarkVibe ? 'text-white/60' : 'text-amber-900/40'}`}>
+            Recomendação
+          </span>
+          <h3 className={`text-lg font-display font-bold leading-tight uppercase tracking-tight ${isDarkVibe ? 'text-white' : 'text-amber-900'}`}>
+            {recommendation.suggestion.recommendedWineType}
+          </h3>
+        </div>
         <button 
             onClick={onToggleFavorite}
-            className="bg-white hover:bg-gray-100 rounded-full p-2 text-gray-400 hover:text-red-500 transition-all border border-gray-200"
+            className={`rounded-full p-2 transition-all border ${isDarkVibe ? 'bg-white/10 hover:bg-white/20 border-white/20 text-white/40 hover:text-red-400' : 'bg-white hover:bg-gray-100 border-gray-200 text-gray-400 hover:text-red-500'}`}
         >
             {isFavorite ? <HeartIconSolid className="h-5 w-5 text-red-500" /> : <HeartIcon className="h-5 w-5" />}
         </button>
@@ -115,10 +141,9 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({ recommendation, dishNam
         </section>
 
         <section>
-          <SectionHeader title="Estilo Sugerido" />
-          <div>
-            <p className="font-bold text-gray-900 text-base">{suggestion.recommendedWineType}</p>
-            <p className="text-xs text-gray-500 font-medium italic mt-0.5">{suggestion.recommendedGrape}</p>
+          <SectionHeader title="Varietal Sugerida" />
+          <div className={`p-3 rounded-md border ${isDarkVibe ? 'bg-cabernet-50/50 border-cabernet-100' : 'bg-amber-50/50 border-amber-100'}`}>
+            <p className="font-bold text-gray-900 text-base">{suggestion.recommendedGrape}</p>
           </div>
         </section>
 
