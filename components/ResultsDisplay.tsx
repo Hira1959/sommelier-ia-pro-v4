@@ -40,7 +40,12 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
         {recommendations.map((rec, index) => {
             const id = generateFavoriteId(query, rec);
             const isFavorite = favorites.some(fav => fav.id === id);
-            const imageForCard = dishImages[index] || dishImages[0] || '';
+            const PLACEHOLDERS = [
+              'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=800&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?q=80&w=800&auto=format&fit=crop'
+            ];
+            const imageForCard = dishImages[index] || dishImages[0] || PLACEHOLDERS[index % 3];
 
             return (
                 <SuggestionCard 

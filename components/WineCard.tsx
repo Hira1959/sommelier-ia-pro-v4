@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Recommendation, Wine } from '../types';
 import { ShopIcon, StarIcon, StarIconOutline, HeartIcon, HeartIconSolid, ChevronDownIcon } from './Icons';
 
@@ -63,17 +63,48 @@ const WineListItem: React.FC<{ wine: Wine, isStarred: boolean, onToggle: () => v
 const SuggestionCard: React.FC<SuggestionCardProps> = ({ recommendation, dishName, dishImage, isFavorite, onToggleFavorite, shoppingList, onToggleShoppingList }) => {
   const { wines, suggestion } = recommendation;
   const [imageStatus, setImageStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
+  const [currentSrc, setCurrentSrc] = useState(dishImage);
+
+  const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800';
+
+  // Sincroniza o src quando a prop dishImage mudar (nova busca)
+  useEffect(() => {
+    setCurrentSrc(dishImage);
+    setImageStatus('loading');
+  }, [dishImage]);
+
+  const handleImageError = () => {
+    if (currentSrc !== FALLBACK_IMAGE) {
+      console.warn(`Falha ao carregar imagem: ${currentSrc}. Tentando fallback...`);
+      setCurrentSrc(FALLBACK_IMAGE);
+    } else {
+      setImageStatus('error');
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-soft overflow-hidden flex flex-col border border-gray-100 transition-all duration-300 hover:shadow-xl h-full">
       <div className="relative h-64 w-full overflow-hidden bg-gray-100 group flex-shrink-0">
         <img 
-          src={dishImage} 
+          src={currentSrc} 
           alt={dishName}
-          className={`absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 ${imageStatus === 'loaded' ? 'opacity-100' : 'opacity-0'}`}
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 group-hover:scale-105 ${imageStatus === 'loaded' ? 'opacity-100' : 'opacity-0'}`}
           onLoad={() => setImageStatus('loaded')}
-          onError={() => setImageStatus('error')}
+          onError={handleImageError}
         />
+        {(imageStatus === 'loading' || imageStatus === 'error') && (
+          <div className={`absolute inset-0 flex flex-col items-center justify-center ${imageStatus === 'loading' ? 'bg-gray-200' : 'bg-gray-200 text-gray-400'} p-4 text-center`}>
+            {imageStatus === 'loading' && <div className="absolute inset-0 animate-shimmer"></div>}
+            {imageStatus === 'error' && (
+              <>
+                <svg className="w-12 h-12 mb-2 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span className="text-[10px] font-sans uppercase tracking-widest font-bold">Imagem Indisponível</span>
+              </>
+            )}
+          </div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
         <button 
             onClick={onToggleFavorite}
