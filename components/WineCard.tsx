@@ -71,6 +71,16 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({ recommendation, dishNam
   useEffect(() => {
     setCurrentSrc(dishImage);
     setImageStatus('loading');
+
+    // Timeout de segurança: se não carregar em 7s, força fallback
+    const timer = setTimeout(() => {
+      if (imageStatus === 'loading') {
+        console.warn(`Timeout de 7s atingido para: ${dishImage}. Forçando fallback.`);
+        handleImageError();
+      }
+    }, 7000);
+
+    return () => clearTimeout(timer);
   }, [dishImage]);
 
   const handleImageError = () => {
