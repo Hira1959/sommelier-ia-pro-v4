@@ -1,6 +1,5 @@
 import "dotenv/config";
 import express from "express";
-import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import { XMLParser } from "fast-xml-parser";
 import { rateLimit } from "express-rate-limit";
@@ -281,6 +280,7 @@ app.post("/api/images", async (req, res) => {
 
 // Integração com o Vite (Middleware)
 if (process.env.NODE_ENV !== "production") {
+  const { createServer: createViteServer } = await import("vite");
   const vite = await createViteServer({
     server: { middlewareMode: true },
     appType: "spa",
@@ -290,6 +290,10 @@ if (process.env.NODE_ENV !== "production") {
   app.use(express.static("dist"));
 }
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Servidor rodando em http://localhost:${PORT}`);
+  });
+}
+
+export default app;
