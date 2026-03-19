@@ -160,26 +160,42 @@ const CATEGORY_CACHE: Record<string, string> = {};
 const FOOD_LIBRARY: Record<string, string[]> = {
   meat: [
     'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=800',
-    'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800'
+    'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800',
+    'https://images.unsplash.com/photo-1600891964599-f61ba0e24092?q=80&w=800',
+    'https://images.unsplash.com/photo-1529692236671-61f9ad78a621?q=80&w=800'
   ],
   pasta: [
-    'https://images.unsplash.com/photo-1473093226795-af9932fe5856?q=80&w=800'
+    'https://images.unsplash.com/photo-1473093226795-af9932fe5856?q=80&w=800',
+    'https://images.unsplash.com/photo-1551183053-bf91a1d81141?q=80&w=800',
+    'https://images.unsplash.com/photo-1556761223-4c4282c73f77?q=80&w=800',
+    'https://images.unsplash.com/photo-1484156811273-e615b5b7ca15?q=80&w=800'
   ],
   sushi: [
-    'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=800'
+    'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=800',
+    'https://images.unsplash.com/photo-1583623025817-d180a2221d0a?q=80&w=800',
+    'https://images.unsplash.com/photo-1553621042-f6e147245754?q=80&w=800',
+    'https://images.unsplash.com/photo-1563612116625-3012372fccbc?q=80&w=800'
   ],
   seafood: [
-    'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=800'
+    'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=800',
+    'https://images.unsplash.com/photo-1534080564607-31726bd7432b?q=80&w=800',
+    'https://images.unsplash.com/photo-1534604973900-c41ab4c5e636?q=80&w=800',
+    'https://images.unsplash.com/photo-1467003909585-2f8a72700288?q=80&w=800'
   ],
   salad: [
-    'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=800'
+    'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=800',
+    'https://images.unsplash.com/photo-1546793665-c74683c3f38d?q=80&w=800',
+    'https://images.unsplash.com/photo-1540420773420-3366772f4999?q=80&w=800'
   ],
   dessert: [
-    'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?q=80&w=800'
+    'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?q=80&w=800',
+    'https://images.unsplash.com/photo-1488477181946-6428a0291777?q=80&w=800',
+    'https://images.unsplash.com/photo-1551024506-0bccd828d307?q=80&w=800'
   ],
   default: [
     'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?q=80&w=800',
-    'https://images.unsplash.com/photo-1506377247377-2a5b3b0ca7df?q=80&w=800'
+    'https://images.unsplash.com/photo-1506377247377-2a5b3b0ca7df?q=80&w=800',
+    'https://images.unsplash.com/photo-1474722883353-2309adad3c0c?q=80&w=800'
   ]
 };
 
@@ -223,13 +239,43 @@ app.post("/api/images", async (req, res) => {
     
     const pool = FOOD_LIBRARY[category];
     const charSum = dishName.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
-    const heroImage = pool[charSum % pool.length];
+    
+    // Seleciona até 3 imagens diferentes do pool, se disponíveis
+    const resultImages = [];
+    for (let i = 0; i < 3; i++) {
+        const index = (charSum + i) % pool.length;
+        let url = pool[index];
+        // Adiciona parâmetros de otimização se não existirem
+        if (!url.includes('auto=format')) {
+            url += url.includes('?') ? '&auto=format&fit=crop&q=80' : '?auto=format&fit=crop&q=80';
+        }
+        
+        if (!resultImages.includes(url)) {
+            resultImages.push(url);
+        }
+    }
+    
+    // Se ainda não tiver 3 e tivermos mais no pool, completa com as primeiras que sobraram
+    if (resultImages.length < 3 && pool.length > resultImages.length) {
+        for(const img of pool) {
+            let url = img;
+            if (!url.includes('auto=format')) {
+                url += url.includes('?') ? '&auto=format&fit=crop&q=80' : '?auto=format&fit=crop&q=80';
+            }
+            if(!resultImages.includes(url) && resultImages.length < 3) resultImages.push(url);
+        }
+    }
 
-    console.log(`Hero image selecionada para "${dishName}": ${heroImage}`);
-    res.json([heroImage]); // Retorna como array de 1 para manter compatibilidade básica se necessário
+    console.log(`Hero images selecionadas para "${dishName}": ${resultImages.join(', ')}`);
+    res.json(resultImages);
   } catch (error) {
     console.error("Erro na rota /api/images:", error);
-    res.json([FOOD_LIBRARY.default[0]]);
+    const defaults = [
+        'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800',
+        'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=800',
+        'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&q=80&w=800'
+    ];
+    res.json(defaults);
   }
 });
 

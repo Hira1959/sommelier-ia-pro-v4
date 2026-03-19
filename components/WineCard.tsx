@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Recommendation, Wine } from '../types';
-import { ShopIcon, StarIcon, StarIconOutline, HeartIcon, HeartIconSolid, ChevronDownIcon } from './Icons';
+import { ShopIcon, StarIcon, StarIconOutline, HeartIcon, HeartIconSolid, DishIcon, GrapeDotsIcon, ChefIcon, SparklesIcon } from './Icons';
 
 interface SuggestionCardProps {
   recommendation: Recommendation;
@@ -13,9 +13,11 @@ interface SuggestionCardProps {
   onToggleShoppingList: (wineId: string) => void;
 }
 
-const SectionHeader: React.FC<{ title: string }> = ({ title }) => (
+const SectionHeader: React.FC<{ title: string, icon: React.ReactNode }> = ({ title, icon }) => (
   <div className="flex items-center gap-2 mb-2">
-    <div className="w-1.5 h-1.5 rounded-full bg-cabernet-800"></div>
+    <div className="w-4 h-4 text-cabernet-800 opacity-70">
+      {icon}
+    </div>
     <h4 className="font-sans font-bold text-[11px] tracking-[0.15em] text-gray-800 uppercase">{title}</h4>
   </div>
 );
@@ -114,7 +116,7 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({ recommendation, dishNam
   };
 
   return (
-    <div className={`rounded-lg shadow-soft overflow-hidden flex flex-col border border-gray-100 transition-all duration-300 hover:shadow-xl h-full bg-white`}>
+    <div aria-label="Wine Suggestion Card" className={`rounded-lg shadow-soft overflow-hidden flex flex-col border border-gray-100 transition-all duration-300 hover:shadow-xl h-full bg-white`}>
       <div className={`p-6 pb-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-br ${vibeGradient}`}>
         <div className="flex flex-col">
           <span className={`text-[10px] uppercase tracking-[0.2em] font-bold mb-1 ${isDarkVibe ? 'text-white/60' : 'text-amber-900/40'}`}>
@@ -134,28 +136,28 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({ recommendation, dishNam
 
       <div className="p-6 space-y-6 flex-grow flex flex-col">
         <section>
-          <SectionHeader title="O Prato" />
+          <SectionHeader title="O Prato" icon={<DishIcon />} />
           <p className="text-sm text-gray-600 font-serif-text leading-relaxed">
             {suggestion.dishDescription}
           </p>
         </section>
 
         <section>
-          <SectionHeader title="Varietal Sugerida" />
+          <SectionHeader title="Varietal Sugerida" icon={<GrapeDotsIcon />} />
           <div className={`p-3 rounded-md border ${isDarkVibe ? 'bg-cabernet-50/50 border-cabernet-100' : 'bg-amber-50/50 border-amber-100'}`}>
             <p className="font-bold text-gray-900 text-base">{suggestion.recommendedGrape}</p>
           </div>
         </section>
 
         <section>
-          <SectionHeader title="A Consultoria" />
+          <SectionHeader title="A Consultoria" icon={<SparklesIcon />} />
           <p className="text-sm text-gray-600 font-serif-text leading-relaxed">
             {suggestion.reasoning}
           </p>
         </section>
         
         <section className="mt-6 pt-6 border-t border-gray-100">
-          <SectionHeader title="Vinhos da Adega" />
+          <SectionHeader title="Vinhos da Adega" icon={<ChefIcon />} />
           <div className="mt-4 space-y-2">
             {wines.map((wine) => (
               <WineListItem 

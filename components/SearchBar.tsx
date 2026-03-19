@@ -48,7 +48,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isSearching, isDisabled
 
   return (
     <div className="w-full max-w-2xl mx-auto px-4 -mt-10 relative z-30">
-        <div className="bg-white rounded-xl shadow-xl p-6 sm:p-8 border border-gray-100">
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] p-6 sm:p-8 border border-white/40">
             <h2 className="text-xl sm:text-2xl font-display font-bold text-cabernet-900 mb-2">
                 Descubra o Vinho Perfeito
             </h2>
@@ -59,7 +59,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isSearching, isDisabled
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="relative group">
                     <div className="absolute top-4 left-0 pl-4 flex items-start pointer-events-none">
-                        <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="h-4 w-4 text-gray-400 group-focus-within:text-cabernet-800 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </div>
@@ -71,7 +71,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isSearching, isDisabled
                         onChange={(e) => setQuery(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder="Ex: Picanha assada com batatas rústicas..."
-                        className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-11 pr-4 py-3.5 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-cabernet-100 focus:border-cabernet-800 transition-all outline-none resize-none overflow-hidden min-h-[56px]"
+                        className="w-full bg-white/40 backdrop-blur-sm border border-white/60 rounded-xl pl-11 pr-4 py-3.5 text-gray-700 placeholder-gray-400 focus:ring-4 focus:ring-cabernet-900/5 focus:bg-white/80 focus:border-cabernet-800/30 transition-all outline-none resize-none overflow-hidden min-h-[58px] shadow-sm"
                         disabled={isDisabled}
                     />
                 </div>
@@ -80,10 +80,10 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isSearching, isDisabled
                     type="submit"
                     disabled={isDisabled || !query.trim() || !!error}
                     className={`
-                        w-full flex items-center justify-center gap-3 py-3 rounded-lg font-bold transition-all duration-300
+                        w-full flex items-center justify-center gap-3 py-4 rounded-xl font-bold transition-all duration-300
                         ${isDisabled || !query.trim() || !!error 
-                            ? 'bg-slate-200 text-slate-500 cursor-not-allowed shadow-inner' 
-                            : 'bg-cabernet-900 text-white hover:bg-cabernet-800 shadow-lg transform hover:-translate-y-0.5 active:translate-y-0'}
+                            ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-inner' 
+                            : 'bg-cabernet-900 text-white hover:bg-cabernet-800 shadow-xl shadow-cabernet-900/20 transform hover:-translate-y-0.5 active:translate-y-0'}
                     `}
                 >
                     {isSearching ? (
@@ -91,12 +91,12 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isSearching, isDisabled
                     ) : (
                         <>
                             <WineGlassIcon className="w-4 h-4" />
-                            <span className="text-sm">Encontrar Harmonizações</span>
+                            <span className="text-sm uppercase tracking-widest">Encontrar Harmonizações</span>
                         </>
                     )}
                 </button>
 
-                {error && <p className="text-xs text-red-500 mt-2 text-center">{error}</p>}
+                {error && <p className="text-xs text-red-500 mt-2 text-center font-medium">{error}</p>}
             </form>
         </div>
     </div>
