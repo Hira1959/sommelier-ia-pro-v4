@@ -42,9 +42,8 @@ app.get("/api/wines", async (_req, res) => {
 
     const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_" });
     const result = parser.parse(xmlText);
-
     const items = result.rss?.channel?.item || [];
-    const wines = (Array.isArray(items) ? items : [items])
+    cachedWines = (Array.isArray(items) ? items : [items])
       .map((item: any) => ({
         id: String(item["g:id"]),
         title: item.title,
@@ -57,7 +56,6 @@ app.get("/api/wines", async (_req, res) => {
       }))
       .filter((w: any) => w.id && w.title);
 
-    cachedWines = wines;
     lastFetchTime = Date.now();
     res.json(cachedWines);
   } catch (error) {
@@ -72,6 +70,30 @@ const getAI = () => {
   return new GoogleGenAI({ apiKey: apiKey || "" });
 };
 
+// Utilitário: garante que os vinhos estejam carregados
+async function ensureWinesLoaded() {
+  if (cachedWines.length > 0 && Date.now() - lastFetchTime < CACHE_DURATION) return;
+  const response = await fetch(WINE_FEED_URL);
+  if (!response.ok) throw new Error("Falha ao buscar XML da adega");
+  const xmlText = await response.text();
+  const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_" });
+  const result = parser.parse(xmlText);
+  const items = result.rss?.channel?.item || [];
+  cachedWines = (Array.isArray(items) ? items : [items])
+    .map((item: any) => ({
+      id: String(item["g:id"]),
+      title: item.title,
+      description: item.description,
+      link: item.link,
+      image_link: item["g:image_link"],
+      price: String(item["g:price"]),
+      sale_price: item["g:sale_price"] ? String(item["g:sale_price"]) : undefined,
+      brand: item["g:brand"],
+    }))
+    .filter((w: any) => w.id && w.title);
+  lastFetchTime = Date.now();
+}
+
 app.post("/api/pairings", async (req, res) => {
   try {
     const { dish, excludedWineIds = [] } = req.body;
@@ -79,10 +101,8 @@ app.post("/api/pairings", async (req, res) => {
 
     const cleanDish = String(dish).replace(/[<>{}[\]\\]/g, "").slice(0, 200);
 
-    if (cachedWines.length === 0) {
-      res.status(500).json({ error: "Adega não carregada ainda. Tente novamente." });
-      return;
-    }
+    // Carrega vinhos automaticamente se o cache estiver vazio (cold start serverless)
+    await ensureWinesLoaded();
 
     const ai = getAI();
     const wineListForPrompt = cachedWines
