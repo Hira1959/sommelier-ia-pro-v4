@@ -18,3 +18,17 @@ View your app in AI Studio: https://ai.studio/apps/56210948-6341-4d55-8012-acfad
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
+## 🚀 Fluxo de Deploy
+
+Este projeto está configurado para **Deploy Contínuo no Vercel** através do GitHub:
+
+1. As alterações são enviadas para o repositório **GitHub**.
+2. O **Vercel** detecta o novo commit e realiza o deploy automático.
+
+**Comandos para atualizar o site:**
+```bash
+git add .
+git commit -m "Sua mensagem descritiva"
+git push origin main
+```
