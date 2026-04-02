@@ -39,7 +39,7 @@ app.use((req, res, next) => {
 // Cache da adega
 let cachedWines: any[] = [];
 let lastFetchTime = 0;
-const CACHE_DURATION = 1000 * 60 * 60; // 1 hora
+const CACHE_DURATION = 1000 * 60 * 5; // 5 minutos (antes era 1 hora)
 const WINE_FEED_URL = 'https://feeds.app.bagypro.com/33560/qQUsulhJnmvLPRYJn2p2elIS2mTmHnM7ssxB';
 
 app.get("/api/wines", async (req, res) => {
@@ -49,7 +49,7 @@ app.get("/api/wines", async (req, res) => {
       return;
     }
 
-    const response = await fetch(WINE_FEED_URL);
+    const response = await fetch(`${WINE_FEED_URL}?t=${Date.now()}`);
     if (!response.ok) throw new Error("Falha ao buscar XML da adega");
     const xmlText = await response.text();
 
@@ -108,7 +108,9 @@ app.post("/api/pairings", async (req, res) => {
       .map((w: any) => ({
         wineId: w.id,
         title: w.title,
-        description: w.description
+        description: w.description,
+        price: w.price,
+        sale_price: w.sale_price
       })).slice(0, 150);
 
     const systemInstruction = `Você é um Sommelier de IA especializado em gastronomia.

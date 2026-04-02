@@ -25,7 +25,7 @@ app.get("/api/health", (_req, res) => {
 // Cache da adega (persiste na memória enquanto a instância viver)
 let cachedWines: any[] = [];
 let lastFetchTime = 0;
-const CACHE_DURATION = 1000 * 60 * 60; // 1 hora
+const CACHE_DURATION = 1000 * 60 * 5; // 5 minutos (antes era 1 hora)
 const WINE_FEED_URL =
   "https://feeds.app.bagypro.com/33560/qQUsulhJnmvLPRYJn2p2elIS2mTmHnM7ssxB";
 
@@ -36,7 +36,7 @@ app.get("/api/wines", async (_req, res) => {
       return;
     }
 
-    const response = await fetch(WINE_FEED_URL);
+    const response = await fetch(`${WINE_FEED_URL}?t=${Date.now()}`);
     if (!response.ok) throw new Error("Falha ao buscar XML da adega");
     const xmlText = await response.text();
 
@@ -73,7 +73,7 @@ const getAI = () => {
 // Utilitário: garante que os vinhos estejam carregados
 async function ensureWinesLoaded() {
   if (cachedWines.length > 0 && Date.now() - lastFetchTime < CACHE_DURATION) return;
-  const response = await fetch(WINE_FEED_URL);
+  const response = await fetch(`${WINE_FEED_URL}?t=${Date.now()}`);
   if (!response.ok) throw new Error("Falha ao buscar XML da adega");
   const xmlText = await response.text();
   const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_" });
@@ -107,7 +107,13 @@ app.post("/api/pairings", async (req, res) => {
     const ai = getAI();
     const wineListForPrompt = cachedWines
       .filter((w: any) => !excludedWineIds?.includes(w.id))
-      .map((w: any) => ({ wineId: w.id, title: w.title, description: w.description }))
+      .map((w: any) => ({ 
+        wineId: w.id, 
+        title: w.title, 
+        description: w.description,
+        price: w.price,
+        sale_price: w.sale_price
+      }))
       .slice(0, 150);
 
     const systemInstruction = `Você é um Sommelier de IA especializado em gastronomia.
